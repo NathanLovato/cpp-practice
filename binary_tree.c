@@ -1,3 +1,6 @@
+#ifndef BinaryTree
+#define BinaryTree
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,10 +75,10 @@ node *BinaryTreeSearch(node *treeRoot, int value) {
     if (currentNode->value == value) {
       return currentNode;
     }
-    if (currentNode->value < value) {
+    if (currentNode->value < value && currentNode->right != NULL) {
       currentNode = currentNode->right;
       continue;
-    } else {
+    } else if (currentNode->left != NULL) {
       currentNode = currentNode->left;
       continue;
     }
@@ -83,10 +86,40 @@ node *BinaryTreeSearch(node *treeRoot, int value) {
   }
 }
 
+// TODO: remove one node from the tree and update the other nodes
+bool BinaryTreeRemove(node *treeRoot, int value) {
+  bool result = false;
+  if (treeRoot == NULL)
+    return result;
+
+  node *currentNode = treeRoot;
+  while (currentNode != NULL) {
+    if (currentNode->value == value) {
+      node *right = currentNode->right;
+      while (right != NULL) {
+        currentNode->value = right->value;
+      }
+      result = true;
+      break;
+    }
+  }
+  return result;
+}
+
+# define COUNT 6
 int main(int argc, char *argv[]) {
   node *tree = newNode(1);
-  for (int i = 0; i < 100; i++) {
-    BinaryTreeInsert(tree, newNode(1));
+  int values[COUNT] = {12, 5, 9, 22, 3, 16};
+
+  for (int i = 0; i < COUNT; i++) {
+    BinaryTreeInsert(tree, newNode(values[i]));
   }
   BinaryTreePrint(tree);
+  /* node *node = BinaryTreeSearch(tree, 124); */
+  /* if (node != NULL) { */
+  /*   printf("Found: %d\n", node->value); */
+  /* } else { */
+  /*   printf("Node not found\n"); */
+  /* } */
 }
+#endif

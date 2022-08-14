@@ -1,20 +1,22 @@
 #include "stdbool.h"
 #include "stdlib.h"
+#include <stdio.h>
 
-struct Vector {
+typedef struct Vector {
   void **items;
-  unsigned int itemCount; // Current number of items contained in the vector
-  unsigned int capacity;  // Maximum number of items the vector can hold before
+  size_t itemCount; // Current number of items contained in the vector
+  size_t capacity;  // Maximum number of items the vector can hold before
                           // needing a resize
-} typedef Vector;
+} Vector;
 
-Vector *VectorCreate(int initialSize);
-bool VectorResize(Vector *vector, int newCapacity);
+Vector *VectorCreate();
+void VectorResize(Vector *vector, int newCapacity);
 void VectorAppend(Vector *vector, void *newItem);
 void VectorRemove(Vector *vector, int index);
 void VectorSet(Vector *vector, int index, void *item);
 void *VectorGet(Vector *vector, int index);
 void VectorFree(Vector *vector);
+void VectorPrint(Vector *vector);
 
 Vector *VectorCreate() {
   Vector *vector = (Vector *)malloc(sizeof(Vector));
@@ -23,19 +25,17 @@ Vector *VectorCreate() {
   return vector;
 }
 
-bool VectorResize(Vector *vector, int newCapacity) {
+void VectorResize(Vector *vector, int newCapacity) {
   if (!vector)
-    return true;
+    return;
 
-  bool result = false;
-  void **items = realloc(vector->items, sizeof(void *) * newCapacity);
-  if (items) {
-    vector->items = items;
-    vector->capacity = newCapacity;
-    result = true;
+  void *items = realloc(vector->items, sizeof(void *) * newCapacity);
+  if (!items) {
+    exit(1);
   }
 
-  return result;
+  vector->items = &items;
+  vector->capacity = newCapacity;
 }
 
 void VectorAppend(Vector *vector, void *newItem) {
@@ -89,4 +89,11 @@ void VectorFree(Vector *vector) {
   if (!vector)
     return;
   free(vector->items);
+  free(vector);
+}
+
+void VectorPrint(Vector *vector) {
+  for (int i = 0; i < vector->itemCount; i++) {
+    printf("%p\n", vector->items[i]);
+  }
 }
