@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 
+// Simple entities to test the stack implementation.
 class Vector2 {
 public:
   float x, y;
@@ -24,6 +25,8 @@ public:
   }
 };
 
+// Stack implementation. Has a limited capacity, can push, and pop elements on the back end.
+// Functions allow you to get any element from the stack.
 template <class T> class Stack {
 private:
   unsigned int capacity;
@@ -79,6 +82,7 @@ public:
   }
 
   int get_capacity() const { return capacity; }
+  int get_size() const { return size; }
 };
 
 int main(int argc, char *argv[]) {
