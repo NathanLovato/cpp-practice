@@ -1,5 +1,4 @@
 #include <iostream>
-#include <stdio.h>
 
 // Simple entities to test the stack implementation.
 class Vector2 {
