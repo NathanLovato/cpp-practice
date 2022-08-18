@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <iostream>
+#include <stdio.h>
 
 // Simple entities to test the stack implementation.
 class Vector2 {
@@ -25,8 +25,9 @@ public:
   }
 };
 
-// Stack implementation. Has a limited capacity, can push, and pop elements on the back end.
-// Functions allow you to get any element from the stack.
+// Stack implementation. Can increase and decrease capacity like std::vector,
+// push, and pop elements on the back end. Functions allow you to get any
+// element from the stack.
 template <class T> class Stack {
 private:
   unsigned int capacity;
@@ -48,14 +49,23 @@ public:
     if (size == 0)
       return nullptr;
 
-    return elements[size - 1];
     size--;
+    return &elements[size];
   }
 
   inline void push_back(T value) {
+    // If we reached the maximum capacity, we double it and reallocate memory,
+    // copying all the elements over. This is the principle of vectors.
     if (size == capacity) {
-      return;
+      T *old = elements;
+      capacity *= 2;
+      elements = new T[capacity];
+      for (int i = 0; i < size; ++i) {
+        elements[i] = old[i];
+      }
+      delete[] old;
     }
+
     elements[size] = value;
     size++;
   }
@@ -86,20 +96,30 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-  const int size = 20;
-  auto *stack = new Stack<Entity>(size);
+  const int size = 40;
+  // Allocating on the stack instead of the heap allows for faster access and
+  // the Stack object itself will be freed when going out of scope.
+  auto stack = new Stack<Entity>(size/2);
 
-  for (int i = 0; i < stack->get_capacity(); i++) {
-    const Entity *entity = new Entity({10 + float(i), 10 + float(i)}, 5, {10, 10});
+  for (int i = 0; i < size; i++) {
+    // We allocate entities on the heap as in a real game they'd likely be used
+    // in several places.
+    const Entity *entity =
+        new Entity({10 + float(i), 10 + float(i)}, 5, {10, 10});
     stack->push_back(*entity);
   }
 
   Entity *entity = stack->front();
-  std::cout << "Position: " << entity->position.x << ", " << entity->position.y << std::endl;
+  std::cout << "Position: " << entity->position.x << ", " << entity->position.y
+            << std::endl;
   std::cout << "Rotation: " << entity->rotation << std::endl;
-  std::cout << "Scale: " << entity->scale.x << ", " << entity->scale.y << std::endl;
+  std::cout << "Scale: " << entity->scale.x << ", " << entity->scale.y
+            << std::endl;
 
-  delete stack;
+  // We need to free the entities to avoid memory leaks, then the stack.
+  while (!stack->empty()) {
+    delete stack->pop_back();
+  }
 
   return 0;
 }
