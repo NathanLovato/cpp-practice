@@ -99,17 +99,20 @@ int main(int argc, char *argv[]) {
   const int size = 40;
   // Allocating on the stack instead of the heap allows for faster access and
   // the Stack object itself will be freed when going out of scope.
-  auto stack = new Stack<Entity>(size/2);
+  //
+  // Note: to allocate on the stack, omit the "new" keyword: it's for allocating
+  // on the heap and getting a pointer.
+  auto stack = Stack<Entity>(size/2);
 
   for (int i = 0; i < size; i++) {
     // We allocate entities on the heap as in a real game they'd likely be used
     // in several places.
     const Entity *entity =
         new Entity({10 + float(i), 10 + float(i)}, 5, {10, 10});
-    stack->push_back(*entity);
+    stack.push_back(*entity);
   }
 
-  Entity *entity = stack->front();
+  Entity *entity = stack.front();
   std::cout << "Position: " << entity->position.x << ", " << entity->position.y
             << std::endl;
   std::cout << "Rotation: " << entity->rotation << std::endl;
@@ -117,8 +120,8 @@ int main(int argc, char *argv[]) {
             << std::endl;
 
   // We need to free the entities to avoid memory leaks, then the stack.
-  while (!stack->empty()) {
-    delete stack->pop_back();
+  while (!stack.empty()) {
+    delete stack.pop_back();
   }
 
   return 0;
