@@ -44,12 +44,12 @@ public:
 
   inline bool empty() const { return size == 0; }
 
-  inline T *pop_back() {
+  inline T pop_back() {
     if (size == 0)
       return nullptr;
 
     size--;
-    return &elements[size];
+    return elements[size];
   }
 
   inline void push_back(T value) {
@@ -69,25 +69,25 @@ public:
     size++;
   }
 
-  inline T *back() {
+  inline T back() {
     if (size == 0) {
       return nullptr;
     }
-    return &elements[size - 1];
+    return elements[size - 1];
   }
 
-  inline T *front() {
+  inline T front() {
     if (size == 0) {
       return nullptr;
     }
-    return &elements[0];
+    return elements[0];
   }
 
-  inline T *get(unsigned int index) {
+  inline T get(unsigned int index) {
     if (index < 0 || index >= size) {
       return nullptr;
     }
-    return &elements[index];
+    return elements[index];
   }
 
   int get_capacity() const { return capacity; }
@@ -101,14 +101,19 @@ int main(int argc, char *argv[]) {
   //
   // Note: to allocate on the stack, omit the "new" keyword: it's for allocating
   // on the heap and getting a pointer.
-  auto stack = Stack<Entity>(size/2);
+  //
+  // Note 2: initially I wrote the type as <Entity>, but it caused a memory
+  // leak: in the for loop, I'd push_back(*entity), dereferencing the pointer.
+  // The entity would get copied into the stack and the original copy would get
+  // lost!
+  auto stack = Stack<Entity *>(size/2);
 
   for (int i = 0; i < size; i++) {
     // We allocate entities on the heap as in a real game they'd likely be used
     // in several places.
-    const Entity *entity =
+    Entity *entity =
         new Entity({10 + float(i), 10 + float(i)}, 5, {10, 10});
-    stack.push_back(*entity);
+    stack.push_back(entity);
   }
 
   Entity *entity = stack.front();
