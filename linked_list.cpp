@@ -28,8 +28,15 @@ public:
   }
 };
 
+// Linked list implementation. Should support values of any type.
+// Features: push and pop values. Insert and remove values at any position in
+// the list.
+//
+// TODO: iterating over the list with range for. Inserting at arbitrary
+// positions.
 template <class T> class LinkedList {
 public:
+  // Represents one element of the linked list.
   class Element {
     friend class LinkedList;
 
@@ -54,6 +61,8 @@ public:
     if (!contents) {
       contents = new Contents();
     }
+    // Question: why is there a linter error here? No matching constructor for
+    // initialization of LinkedList<Entity>::Element
     Element *element = new Element(value);
     element->value = value;
     element->previous = contents->last_element;
@@ -81,7 +90,7 @@ public:
     contents->size--;
   }
 
-  bool remove(const Element *element) {
+  void remove(const Element *element) {
     if (element == contents->last_element) {
       contents->last_element = element->previous;
     }
@@ -97,8 +106,24 @@ public:
     delete element;
   }
 
+  // Clears the list and frees all Element instances.
+  void clear() {
+    Element *current = contents->first_element;
+    Element *previous = contents->first_element;
+    while (current) {
+      previous = current;
+      current = current->next;
+      delete previous;
+    }
+    contents->size = 0;
+  }
+
   LinkedList() { contents = new Contents; };
-  ~LinkedList(){};
+  ~LinkedList() {
+    clear();
+    delete contents;
+    delete this;
+  };
 
 private:
   struct Contents {
@@ -111,13 +136,20 @@ private:
 
 int main(int argc, char *argv[]) {
 
+  // We make the list on the stack so it gets freed automatically.
+  //
+  // Questions:
+  // - Does this call its destructor at the end of the scope?
+  // - The list itself is on the stack, but as its Contents is created with new,
+  // the contents and elements are on the heap, right?
   auto list = LinkedList<Entity>();
-  auto entity = new Entity();
-  list.push_back(*entity);
-  list.push_back(*entity);
-  list.push_back(*entity);
+  float numbers[] = {1, 2, 3, 4, 5};
 
-  auto *element = list.get_first();
+  for (float f : numbers) {
+    auto entity = new Entity();
+    entity->position.x = f;
+    list.push_back(*entity);
+  }
 
   exit(0);
 }
