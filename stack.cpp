@@ -29,14 +29,13 @@ public:
 // element from the stack.
 template <class T> class Stack {
 private:
-  unsigned int capacity;
-  unsigned int size;
-  T *elements;
+  unsigned int capacity = 0;
+  unsigned int size = 0;
+  T *elements = nullptr;
 
 public:
   Stack(unsigned int capacity) {
     this->capacity = capacity;
-    this->size = 0;
     this->elements = new T[capacity];
   }
 
