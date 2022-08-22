@@ -32,6 +32,8 @@ public:
 // Features: push and pop values. Insert and remove values at any position in
 // the list.
 //
+// Goal: implement a map algorithm based on linked lists.
+//
 // TODO: iterating over the list with range for. Inserting at arbitrary
 // positions.
 template <class T> class LinkedList {
@@ -41,7 +43,7 @@ public:
     friend class LinkedList;
 
   public:
-    inline Element(T &value) { value = value; };
+    inline Element(T &p_value) { value = p_value; };
     inline Element *get_next() { return next; }
     inline Element *get_previous() { return previous; }
     inline T &get_value() { return value; }
@@ -57,14 +59,10 @@ public:
   inline Element *get_last() { return contents->last_element; }
   inline int get_size() { return contents->size; }
 
-  void push_back(const T &value) {
-    if (!contents) {
-      contents = new Contents();
-    }
+  void push_back(T &value) {
     // Question: why is there a linter error here? No matching constructor for
     // initialization of LinkedList<Entity>::Element
     Element *element = new Element(value);
-    element->value = value;
     element->previous = contents->last_element;
 
     if (contents->last_element) {
@@ -85,9 +83,16 @@ public:
     }
 
     Element *element = contents->last_element;
+
     contents->last_element = element->previous;
     delete element;
     contents->size--;
+
+    // Without this, calling clear() on an empty list will result in an error.
+    if (contents->size == 0) {
+      contents->last_element = nullptr;
+      contents->first_element = nullptr;
+    }
   }
 
   void remove(const Element *element) {
@@ -104,6 +109,12 @@ public:
       element->next->previous = element->previous;
     }
     delete element;
+    contents->size--;
+
+    if (contents->size == 0) {
+      contents->last_element = nullptr;
+      contents->first_element = nullptr;
+    }
   }
 
   // Clears the list and frees all Element instances.
@@ -118,11 +129,12 @@ public:
     contents->size = 0;
   }
 
-  LinkedList() { contents = new Contents; };
+  bool empty() const { return contents->size == 0; }
+
+  LinkedList(){};
   ~LinkedList() {
     clear();
     delete contents;
-    delete this;
   };
 
 private:
@@ -131,25 +143,32 @@ private:
     Element *last_element = nullptr;
     int size = 0;
   };
-  Contents *contents;
+  Contents *contents = new Contents;
 };
 
 int main(int argc, char *argv[]) {
 
   // We make the list on the stack so it gets freed automatically.
-  //
-  // Questions:
-  // - Does this call its destructor at the end of the scope?
-  // - The list itself is on the stack, but as its Contents is created with new,
-  // the contents and elements are on the heap, right?
-  auto list = LinkedList<Entity>();
+  auto list = LinkedList<Entity *>();
   float numbers[] = {1, 2, 3, 4, 5};
 
   for (float f : numbers) {
-    auto entity = new Entity();
+    auto *entity = new Entity();
     entity->position.x = f;
-    list.push_back(*entity);
+    list.push_back(entity);
   }
 
-  exit(0);
+  for (LinkedList<Entity *>::Element *element = list.get_first(); element;
+       element = element->get_next()) {
+    std::cout << element->get_value()->as_string() << '\n';
+  }
+
+  // Freeing the entities;
+    while (list.get_size() > 0) {
+    Entity *entity = list.get_last()->get_value();
+    delete entity;
+    list.pop_back();
+  }
+
+  return 0;
 }
